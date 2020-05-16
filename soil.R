@@ -43,133 +43,140 @@ ggplot(gather(soil_tibble), aes(value)) +
 
 #### 5. plot every clay and oc against every cec (18 different combinations) ####
 # This could be done in two loops I think, but didn't found out how
-plot1 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC1)) +
-    geom_point() + geom_smooth(method = 'lm')
-plot2 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC2)) +
-    geom_point() + geom_smooth(method = 'lm')
-plot3 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC5)) +
-    geom_point() + geom_smooth(method = 'lm')
-plot4 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay2, y=soil_tibble$CEC1)) +
-    geom_point() + geom_smooth(method = 'lm')
-plot5 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay2, y=soil_tibble$CEC2)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot6 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay2, y=soil_tibble$CEC5)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot7 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay5, y=soil_tibble$CEC1)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot8 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay5, y=soil_tibble$CEC2)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot9 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay5, y=soil_tibble$CEC5)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot10 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC1, y=soil_tibble$CEC1)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot11 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC1, y=soil_tibble$CEC2)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot12 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC1, y=soil_tibble$CEC5)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot13 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC2, y=soil_tibble$CEC1)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot14 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC2, y=soil_tibble$CEC2)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot15 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC2, y=soil_tibble$CEC5)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot16 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CEC1)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot17 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CEC2)) +
-  geom_point() + geom_smooth(method = 'lm')
-plot18 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CEC5)) +
-  geom_point() + geom_smooth(method = 'lm')
+plots <- list()
+plots$plot1 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC1)) +
+    geom_point() + geom_smooth(method = 'lm') + xlab('Clay1') + ylab('CEC1')
+plots$plot2 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC2)) +
+    geom_point() + geom_smooth(method = 'lm') + xlab('Clay1') + ylab('CEC2')
+plots$plot3 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC5)) +
+    geom_point() + geom_smooth(method = 'lm') + xlab('Clay1') + ylab('CEC5')
+plots$plot4 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay2, y=soil_tibble$CEC1)) +
+    geom_point() + geom_smooth(method = 'lm') + xlab('Clay2') + ylab('CEC1')
+plots$plot5 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay2, y=soil_tibble$CEC2)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('Clay2') + ylab('CEC2')
+plots$plot6 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay2, y=soil_tibble$CEC5)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('Clay2') + ylab('CEC5')
+plots$plot7 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay5, y=soil_tibble$CEC1)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('Clay5') + ylab('CEC1')
+plots$plot8 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay5, y=soil_tibble$CEC2)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('Clay5') + ylab('CEC2')
+plots$plot9 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay5, y=soil_tibble$CEC5)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('Clay5') + ylab('CEC5')
+plots$plot10 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC1, y=soil_tibble$CEC1)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC1') + ylab('CEC1')
+plots$plot11 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC1, y=soil_tibble$CEC2)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC1') + ylab('CEC2')
+plots$plot12 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC1, y=soil_tibble$CEC5)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC1') + ylab('CEC5')
+plots$plot13 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC2, y=soil_tibble$CEC1)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC2') + ylab('CEC1')
+plots$plot14 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC2, y=soil_tibble$CEC2)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC2') + ylab('CEC2')
+plots$plot15 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC2, y=soil_tibble$CEC5)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC2') + ylab('CEC5')
+plots$plot16 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CEC1)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC5') + ylab('CEC1')
+plots$plot17 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CEC2)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC5') + ylab('CEC2')
+plots$plot18 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CEC5)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC5') + ylab('CEC5')
 
 # Put dependent variable on one single plot:
-figure1 <- ggarrange(plot1, plot4, plot7, plot10, plot13, plot16,
-                     ncol = 2, nrow = 3)
-figure1
-# oc1 and oc2 are best for cec1
+figures <- list()
 
-figure2 <- ggarrange(plot2, plot5, plot8, plot11, plot14, plot17,
+figures$figure1 <- ggarrange(plots$plot1, plots$plot4, plots$plot7, plots$plot10, plots$plot13, plots$plot16,
                      ncol = 2, nrow = 3)
-figure2
-# oc2 is best for cec2
+figures$figure1
+# oc1 and oc2 are best for cec1. clay5 and oc5 have the slightest curves
 
-figure3 <- ggarrange(plot3, plot6, plot9, plot12, plot15, plot18,
+figures$figure2 <- ggarrange(plots$plot2, plots$plot5, plots$plot8, plots$plot11, plots$plot14, plots$plot17,
                      ncol = 2, nrow = 3)
-figure3
-# between 1.0 and 1.5 of oc5 is best for cec5
+figures$figure2
+# oc2 is best for cec2. oc1's data on cec2 is left skewed.
+
+figures$figure3 <- ggarrange(plots$plot3, plots$plot6, plots$plot9, plots$plot12, plots$plot15, plots$plot18,
+                     ncol = 2, nrow = 3)
+figures$figure3
+# a middle dose of oc5 (between 1.0 and 1.5) is best for cec5. it has the steepest curve.
+# clay1, clay2 and clay3 look good too.
 
 #### 6. train a linear model for every combination from 5. (18 models) ####
-lm1 <- lm(CEC1 ~ Clay1, data = soil_tibble)
-sum1 <- summary(lm1); sum1
+simple_linear_models <- list()
 
-lm2 <- lm(CEC1 ~ Clay2, data = soil_tibble)
-sum2 <- summary(lm2); sum2
+simple_linear_models$lm1 <- lm(CEC1 ~ Clay1, data = soil_tibble)
+simple_linear_models$sum1 <- summary(simple_linear_models$lm1);
 
-lm3 <- lm(CEC1 ~ Clay5, data = soil_tibble)
-sum3 <- summary(lm3); sum3
+simple_linear_models$lm2 <- lm(CEC1 ~ Clay2, data = soil_tibble)
+simple_linear_models$sum2 <- summary(simple_linear_models$lm2);
 
-lm4 <- lm(CEC1 ~ OC1, data = soil_tibble)
-sum4 <- summary(lm4); sum4
+simple_linear_models$lm3 <- lm(CEC1 ~ Clay5, data = soil_tibble)
+simple_linear_models$sum3 <- summary(simple_linear_models$lm3);
 
-lm5 <- lm(CEC1 ~ OC2, data = soil_tibble)
-sum5 <- summary(lm5); sum5
+simple_linear_models$lm4 <- lm(CEC1 ~ OC1, data = soil_tibble)
+simple_linear_models$sum4 <- summary(simple_linear_models$lm4);
 
-lm6 <- lm(CEC1 ~ OC5, data = soil_tibble)
-sum6 <- summary(lm6); sum6
+simple_linear_models$lm5 <- lm(CEC1 ~ OC2, data = soil_tibble)
+simple_linear_models$sum5 <- summary(simple_linear_models$lm5);
 
-lm7 <- lm(CEC2 ~ Clay1, data = soil_tibble)
-sum7 <- summary(lm7); sum7
+simple_linear_models$lm6 <- lm(CEC1 ~ OC5, data = soil_tibble)
+simple_linear_models$sum6 <- summary(simple_linear_models$lm6);
 
-lm8 <- lm(CEC2 ~ Clay2, data = soil_tibble)
-sum8 <- summary(lm8); sum8
+simple_linear_models$lm7 <- lm(CEC2 ~ Clay1, data = soil_tibble)
+simple_linear_models$sum7 <- summary(simple_linear_models$lm7);
 
-lm9 <- lm(CEC2 ~ Clay5, data = soil_tibble)
-sum9 <- summary(lm9); sum9
+simple_linear_models$lm8 <- lm(CEC2 ~ Clay2, data = soil_tibble)
+simple_linear_models$sum8 <- summary(simple_linear_models$lm8);
 
-lm10 <- lm(CEC2 ~ OC1, data = soil_tibble)
-sum10 <- summary(lm10); sum10
+simple_linear_models$lm9 <- lm(CEC2 ~ Clay5, data = soil_tibble)
+simple_linear_models$sum9 <- summary(simple_linear_models$lm9);
 
-lm11 <- lm(CEC2 ~ OC2, data = soil_tibble)
-sum11 <- summary(lm11); sum11
+simple_linear_models$lm10 <- lm(CEC2 ~ OC1, data = soil_tibble)
+simple_linear_models$sum10 <- summary(simple_linear_models$lm10);
 
-lm12 <- lm(CEC2 ~ OC5, data = soil_tibble)
-sum12 <- summary(lm12); sum12
+simple_linear_models$lm11 <- lm(CEC2 ~ OC2, data = soil_tibble)
+simple_linear_models$sum11 <- summary(simple_linear_models$lm11);
 
-lm13 <- lm(CEC5 ~ Clay1, data = soil_tibble)
-sum13 <- summary(lm13); sum13
+simple_linear_models$lm12 <- lm(CEC2 ~ OC5, data = soil_tibble)
+simple_linear_models$sum12 <- summary(simple_linear_models$lm12);
 
-lm14 <- lm(CEC5 ~ Clay2, data = soil_tibble)
-sum14 <- summary(lm14); sum14
+simple_linear_models$lm13 <- lm(CEC5 ~ Clay1, data = soil_tibble)
+simple_linear_models$sum13 <- summary(simple_linear_models$lm13);
 
-lm15 <- lm(CEC5 ~ Clay5, data = soil_tibble)
-sum15 <- summary(lm15); sum15
+simple_linear_models$lm14 <- lm(CEC5 ~ Clay2, data = soil_tibble)
+simple_linear_models$sum14 <- summary(simple_linear_models$lm14);
 
-lm16 <- lm(CEC5 ~ OC1, data = soil_tibble)
-sum16 <- summary(lm16); sum16
+simple_linear_models$lm15 <- lm(CEC5 ~ Clay5, data = soil_tibble)
+simple_linear_models$sum15 <- summary(simple_linear_models$lm15);
 
-lm17 <- lm(CEC5 ~ OC2, data = soil_tibble)
-sum17 <- summary(lm17); sum17
+simple_linear_models$lm16 <- lm(CEC5 ~ OC1, data = soil_tibble)
+simple_linear_models$sum16 <- summary(simple_linear_models$lm16);
 
-lm18 <- lm(CEC5 ~ OC5, data = soil_tibble)
-sum18 <- summary(lm18); sum18
+simple_linear_models$lm17 <- lm(CEC5 ~ OC2, data = soil_tibble)
+simple_linear_models$sum17 <- summary(simple_linear_models$lm17);
+
+simple_linear_models$lm18 <- lm(CEC5 ~ OC5, data = soil_tibble)
+simple_linear_models$sum18 <- summary(simple_linear_models$lm18);
+
 #### 7. Put all 18 adjusted R^2 values into a list and compare them ####
 rsq_values <- list(
-  sum1$r.squared,
-  sum2$r.squared,
-  sum3$r.squared,
-  sum4$r.squared,
-  sum5$r.squared,
-  sum6$r.squared,
-  sum7$r.squared,
-  sum8$r.squared,
-  sum9$r.squared,
-  sum10$r.squared,
-  sum11$r.squared,
-  sum12$r.squared,
-  sum13$r.squared,
-  sum14$r.squared,
-  sum15$r.squared,
-  sum16$r.squared,
-  sum17$r.squared,
-  sum18$r.squared
+  simple_linear_models$sum1$r.squared,
+  simple_linear_models$sum2$r.squared,
+  simple_linear_models$sum3$r.squared,
+  simple_linear_models$sum4$r.squared,
+  simple_linear_models$sum5$r.squared,
+  simple_linear_models$sum6$r.squared,
+  simple_linear_models$sum7$r.squared,
+  simple_linear_models$sum8$r.squared,
+  simple_linear_models$sum9$r.squared,
+  simple_linear_models$sum10$r.squared,
+  simple_linear_models$sum11$r.squared,
+  simple_linear_models$sum12$r.squared,
+  simple_linear_models$sum13$r.squared,
+  simple_linear_models$sum14$r.squared,
+  simple_linear_models$sum15$r.squared,
+  simple_linear_models$sum16$r.squared,
+  simple_linear_models$sum17$r.squared,
+  simple_linear_models$sum18$r.squared
 )
 
 # take rsq_values list and convert to tibble
@@ -189,5 +196,49 @@ rsq_values_tibble <- rsq_values_tibble[c('name', 'r_squared')]
 
 # order tibble by ascending R^2 value
 rsq_values_tibble %>% arrange(r_squared)
+
 # best: model 16 (CEC5 ~ OC1), second: model 10 (CEC2 ~ OC1), third: model 17 (CEC5 ~ OC2)
 # so, OC1 and OC2 do have the biggest influence on CEC levels
+
+#### 8. Put all p-values into a list and comprare them ####
+
+p_values <- list(
+  simple_linear_models$sum1$coefficients[,4],
+  simple_linear_models$sum2$coefficients[,4],
+  simple_linear_models$sum3$coefficients[,4],
+  simple_linear_models$sum4$coefficients[,4],
+  simple_linear_models$sum5$coefficients[,4],
+  simple_linear_models$sum6$coefficients[,4],
+  simple_linear_models$sum7$coefficients[,4],
+  simple_linear_models$sum8$coefficients[,4],
+  simple_linear_models$sum9$coefficients[,4],
+  simple_linear_models$sum10$coefficients[,4],
+  simple_linear_models$sum11$coefficients[,4],
+  simple_linear_models$sum12$coefficients[,4],
+  simple_linear_models$sum13$coefficients[,4],
+  simple_linear_models$sum14$coefficients[,4],
+  simple_linear_models$sum15$coefficients[,4],
+  simple_linear_models$sum16$coefficients[,4],
+  simple_linear_models$sum17$coefficients[,4],
+  simple_linear_models$sum18$coefficients[,4]
+)
+
+# take p_values list and convert to tibble
+p_values <- as.data.frame(p_values)
+p_values <- t(p_values)
+p_values <- as.data.frame(p_values)
+p_values_tibble <- as_tibble(p_values)
+
+# rename column
+p_values_tibble <- p_values_tibble %>% rename(slope = Clay1)
+
+# add name column
+p_values_tibble <- p_values_tibble %>% add_column(name = 1:18)
+
+# reorder data.frame / tibble
+p_values_tibble <- p_values_tibble[c('name', '(Intercept)', 'slope')]
+
+# order tibble by ascending p-value
+p_values_tibble %>% arrange(slope)
+
+# best: model 4 (), model 11 and model 12
