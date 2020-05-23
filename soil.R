@@ -87,18 +87,18 @@ figures <- list()
 figures$figure1 <- ggarrange(plots$plot1, plots$plot4, plots$plot7, plots$plot10, plots$plot13, plots$plot16,
                      ncol = 2, nrow = 3)
 figures$figure1
-# OC1 and OC2 are best for CEC1. Clay5 and OC5 have the mildest curves
+# OC1 and OC2 are best for CEC1. Clay5 and OC5 have the mildest curves. OC1 is very left-skewed data.
 
 figures$figure2 <- ggarrange(plots$plot2, plots$plot5, plots$plot8, plots$plot11, plots$plot14, plots$plot17,
                      ncol = 2, nrow = 3)
 figures$figure2
-# OC2 is best for CEC2. OC1's data on CEC2 is left-skewed.
+# OC2 is best for CEC2. OC1's data on CEC2 is left-skewed. OC1 is very left-skewed data.
 
 figures$figure3 <- ggarrange(plots$plot3, plots$plot6, plots$plot9, plots$plot12, plots$plot15, plots$plot18,
                      ncol = 2, nrow = 3)
 figures$figure3
 # a middle dose of oc5 (between 1.0 and 1.5) is best for cec5. it has the steepest curve.
-# Clay1, Clay2 and Clay3 look good too.
+# Clay1, Clay2 and Clay3 look good too. OC1 is very left-skewed data.
 
 #### 6. train a linear model for every combination from 5. (18 models) ####
 simple_linear_models <- list()
@@ -199,6 +199,7 @@ rsq_values_tibble %>% arrange(r_squared)
 
 # best: model 16 (CEC5 ~ OC1), second: model 10 (CEC2 ~ OC1), third: model 17 (CEC5 ~ OC2)
 # Conclusion: OC1 and OC2 do have the biggest influence on CEC levels
+# Best model for CEC2: Model 9 (CEC2 ~ Clay5)
 
 #### 8. Put all p-values into a list and comprare them ####
 p_values <- list(
@@ -252,21 +253,63 @@ plots$plot12 # OC1 for CEC5
 # Correlation coefficients between CEC and OC are higher than between CEC and Clay
 
 #### 9. More with CEC predictors ####
-### CEC1 predictors (from 5.)
-figures$figure4 <- ggarrange(plots$plot10, plots$plot13, ncol = 1, nrow = 1)
+# CEC1 predictors (from 5.)
+figures$figure4 <- ggarrange(plots$plot10, plots$plot13, ncol = 1, nrow = 2)
 figures$figure4
  
-### CEC2 predictors (from 5.)
+# CEC2 predictors (from 5.)
 plots$plot14
 
-### CEC5 predictors (from 5.)
+# CEC5 predictors (from 5.)
 figures$figure5 <- ggarrange(plots$plot3, plots$plot6, plots$plot9, plots$plot18, ncol = 2, nrow = 2)
 figures$figure5
 
-# Straight-line equation for predictor, based on R^2 and top-soil data
-# CEC_Sub = CEC_Top + x*Clay_Top + y*OC_Top , R^2
+#### 10. Best predictor for sub-soil CEC value, given top-soil samples of Clay, OC and CEC ####
+# CEC5 ~ Clay1: Model 13
+simple_linear_models$sum13$r.squared
+# CEC5 ~ OC1: Model 16
+simple_linear_models$sum16$r.squared
+# CEC5 ~ CEC1: New Model (model 19)
+simple_linear_models$lm19 <- lm(CEC5 ~ CEC1, data = soil_tibble)
+simple_linear_models$sum19 <- summary(simple_linear_models$lm19);
+simple_linear_models$sum19$r.squared
+# Plot model 19
+plots$plot19 <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_tibble$CEC5)) +
+  geom_point() + geom_smooth(method = 'lm') + xlab('CEC1') + ylab('CEC5')
+# Put Clay1, OC1 and CEC1 together in one model
+simple_linear_models$lm20 <- lm(CEC5 ~ Clay1 + CEC1 + OC1, data = soil_tibble)
+simple_linear_models$sum20 <- summary(simple_linear_models$lm20);
+simple_linear_models$sum20$r.squared
 
-# residual plot for OC1?
+# Model 20 (CEC5 ~ Clay1, CEC1, OC1) has an R^2 value of 0.309
+# Why? Because if the top layers in a soil contain a high amount of positive ions, usually lower layers contain high amounts too.
+# Additionally in soils ions can move downward ("washed out"). But they can also move toward lower levels.
+
+# Straight-line equation for predictor
+# CEC5 = intercept + x0 * Clay1 + x1 * CEC1 + x2 * OC1
+simple_linear_models$sum20
+# CEC5 = 4.12 + 0.10 * Clay1 + 0.20 * CEC1 - 0.89 * OC1
+
+#### 10. residual plot for Model 19 ####
+residuals <- list(
+  predict(simple_linear_models$lm20), # Save the predicted values
+  residuals(simple_linear_models$lm20) # Save the residual values
+)
+
+residuals <- as.data.frame(residuals)
+residuals_tibble <- as_tibble(residuals)
+names(residuals_tibble)[1] <- 'predicted'
+names(residuals_tibble)[2] <- 'residuals'
+
+plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_tibble$CEC5)) +
+  geom_point() +
+  geom_point(data=residuals_tibble, aes(y = residuals_tibble$predicted), shape = 1) +
+  geom_segment(aes(xend = soil_tibble$CEC1, yend = residuals_tibble$predicted), alpha = .1) +
+  xlab('predictors') + ylab('CEC5') +
+  theme_bw()
+
+plots$residual_plot
+#  There is a slightly non-linear relationship between the residuals and the fitted values
 
 #### 10. Predicting with predictors ####
 
