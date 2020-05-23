@@ -241,3 +241,36 @@ p_values_tibble <- p_values_tibble[c('name', '(Intercept)', 'slope')]
 p_values_tibble %>% arrange(slope)
 
 # best: model 4, model 11 and model 12
+plots$plot4 # Clay2 for CEC1
+plots$plot11 # OC1 for CEC2
+plots$plot12 # OC1 for CEC5
+
+# Above answers assignment question 7: 
+# More CEC gathers in soils rich in soil humus, followed by clay minerals
+# Best predictor for sub-soil CEC2 & CEC5 is OC1, if only top-soil data is available
+
+# Correlation coefficients between CEC and OC are higher than between CEC and Clay
+
+#### 9. More with CEC predictors ####
+### CEC1 predictors (from 5.)
+figures$figure4 <- ggarrange(plots$plot10, plots$plot13, ncol = 1, nrow = 1)
+figures$figure4
+ 
+### CEC2 predictors (from 5.)
+plots$plot14
+
+### CEC5 predictors (from 5.)
+figures$figure5 <- ggarrange(plots$plot3, plots$plot6, plots$plot9, plots$plot18, ncol = 2, nrow = 2)
+figures$figure5
+
+# Straight-line equation for predictor, based on R^2 and top-soil data
+# CEC_Sub = CEC_Top + x*Clay_Top + y*OC_Top , R^2
+
+# residual plot for OC1?
+
+#### 10. Predicting with predictors ####
+
+# Predict sub-soil CEC where Clay1 = 0, using predictor OC1
+# Predict sub-soil CEC where Clay1 has 70% weight in topsoil data
+
+#### 11. Try out something ####
