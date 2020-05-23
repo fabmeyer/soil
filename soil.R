@@ -17,7 +17,7 @@ soil <- read.csv('soil.csv')
 #### 2. inspect data ####
 ### Call the functions on soil to examine the data frame
 dim(soil) # 147 rows with 9 features
-str(soil)
+str(soil) # 147 obs. of  9 variables
 summary(soil)
 colnames(soil)
 typeof(soil) # data.frame
@@ -31,11 +31,11 @@ View(soil)
 
 #### 3. convert to tidyverse ####
 soil_tibble <- as_tibble(soil)
-View(soil_tibble) # looks identical
-typeof(soil_tibble) # list
+View(soil_tibble) # identical
+typeof(soil_tibble) # list, same as soil
 is_tibble(soil_tibble) # TRUE
 
-#### 4. make plots to get an overview ####
+#### 4. make plots for each row to get an overview ####
 ggplot(gather(soil_tibble), aes(value)) + 
   geom_histogram(bins = 30) + 
   facet_wrap(~key, scales = 'free_x')
@@ -87,18 +87,18 @@ figures <- list()
 figures$figure1 <- ggarrange(plots$plot1, plots$plot4, plots$plot7, plots$plot10, plots$plot13, plots$plot16,
                      ncol = 2, nrow = 3)
 figures$figure1
-# oc1 and oc2 are best for cec1. clay5 and oc5 have the slightest curves
+# OC1 and OC2 are best for CEC1. Clay5 and OC5 have the mildest curves
 
 figures$figure2 <- ggarrange(plots$plot2, plots$plot5, plots$plot8, plots$plot11, plots$plot14, plots$plot17,
                      ncol = 2, nrow = 3)
 figures$figure2
-# oc2 is best for cec2. oc1's data on cec2 is left skewed.
+# OC2 is best for CEC2. OC1's data on CEC2 is left-skewed.
 
 figures$figure3 <- ggarrange(plots$plot3, plots$plot6, plots$plot9, plots$plot12, plots$plot15, plots$plot18,
                      ncol = 2, nrow = 3)
 figures$figure3
 # a middle dose of oc5 (between 1.0 and 1.5) is best for cec5. it has the steepest curve.
-# clay1, clay2 and clay3 look good too.
+# Clay1, Clay2 and Clay3 look good too.
 
 #### 6. train a linear model for every combination from 5. (18 models) ####
 simple_linear_models <- list()
@@ -198,10 +198,9 @@ rsq_values_tibble <- rsq_values_tibble[c('name', 'r_squared')]
 rsq_values_tibble %>% arrange(r_squared)
 
 # best: model 16 (CEC5 ~ OC1), second: model 10 (CEC2 ~ OC1), third: model 17 (CEC5 ~ OC2)
-# so, OC1 and OC2 do have the biggest influence on CEC levels
+# Conclusion: OC1 and OC2 do have the biggest influence on CEC levels
 
 #### 8. Put all p-values into a list and comprare them ####
-
 p_values <- list(
   simple_linear_models$sum1$coefficients[,4],
   simple_linear_models$sum2$coefficients[,4],
@@ -241,4 +240,4 @@ p_values_tibble <- p_values_tibble[c('name', '(Intercept)', 'slope')]
 # order tibble by ascending p-value
 p_values_tibble %>% arrange(slope)
 
-# best: model 4 (), model 11 and model 12
+# best: model 4, model 11 and model 12
