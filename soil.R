@@ -314,6 +314,55 @@ plots$residual_plot
 #### 10. Predicting with predictors ####
 
 # Predict sub-soil CEC where Clay1 = 0, using predictor OC1
-# Predict sub-soil CEC where Clay1 has 70% weight in topsoil data
+simple_linear_models$lm21 <- lm(CEC5 ~ 0 + CEC1 + OC1, data = soil_tibble)
+simple_linear_models$sum21 <- summary(simple_linear_models$lm21);
+simple_linear_models$sum21$r.squared
 
+simple_linear_models$sum21
+
+#### 10. residual plot for Model 19 ####
+residuals <- list(
+  predict(simple_linear_models$lm21), # Save the predicted values
+  residuals(simple_linear_models$lm21) # Save the residual values
+)
+
+residuals <- as.data.frame(residuals)
+residuals_tibble <- as_tibble(residuals)
+names(residuals_tibble)[1] <- 'predicted'
+names(residuals_tibble)[2] <- 'residuals'
+
+plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_tibble$CEC5)) +
+  geom_point() +
+  geom_point(data=residuals_tibble, aes(y = residuals_tibble$predicted), shape = 1) +
+  geom_segment(aes(xend = soil_tibble$CEC1, yend = residuals_tibble$predicted), alpha = .1) +
+  xlab('0 CEC1 + predictors') + ylab('CEC5') +
+  theme_bw()
+
+plots$residual_plot
+
+# Predict sub-soil CEC where Clay1 has 70% weight in topsoil data
+simple_linear_models$lm22 <- lm(CEC5 ~ Clay1 * 0.7 + CEC1 + OC1, data = soil_tibble)
+simple_linear_models$sum22 <- summary(simple_linear_models$lm22);
+simple_linear_models$sum22$r.squared
+
+simple_linear_models$sum22
+
+residuals <- list(
+  predict(simple_linear_models$lm22), # Save the predicted values
+  residuals(simple_linear_models$lm22) # Save the residual values
+)
+
+residuals <- as.data.frame(residuals)
+residuals_tibble <- as_tibble(residuals)
+names(residuals_tibble)[1] <- 'predicted'
+names(residuals_tibble)[2] <- 'residuals'
+
+plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_tibble$CEC5)) +
+  geom_point() +
+  geom_point(data=residuals_tibble, aes(y = residuals_tibble$predicted), shape = 1) +
+  geom_segment(aes(xend = soil_tibble$CEC1, yend = residuals_tibble$predicted), alpha = .1) +
+  xlab('70% CEC1 + predictors') + ylab('CEC5') +
+  theme_bw()
+
+plots$residual_plot
 #### 11. Try out something ####
