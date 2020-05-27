@@ -25,7 +25,7 @@ library('yardstick')
 library('knitr')
 library("rmarkdown")
 library('readxl')
-theme_set(theme_pubr())
+theme_set(theme_bw())
 ```
 
 # Load the data set soil.csv and view it.
@@ -57,6 +57,22 @@ While the first 6 functions are printed to the console, the View() function open
 View(soil)
 ```
 
+We can arrange the data to order it look for specific values
+
+```{r}
+arrange(soil, desc(soil$CEC1)) # most fertile to least fertile top-soil
+select(soil, c(1,4,7)) # top-soil samples
+select(soil, c(2,5,8)) # deeper soil samples
+select(soil, c(3,6,9)) # deepest sub-soil samples
+filter(soil, soil$CEC1 > 25.0)
+CEC_topsoil <- arrange(soil, desc(soil$CEC1))
+filter(CEC_topsoil, CEC_topsoil$CEC1 > 25.0) # most fertile top-soil
+Clay_topsoil <- arrange(soil, desc(soil$Clay1))
+filter(Clay_topsoil, Clay_topsoil$Clay1 > 60.0) # highest measured clay in top-soil
+OC_tosoil <- arrange(soil, desc(soil$OC1))
+filter(OC_tosoil, OC_tosoil$OC1 > 6.0) # highest measured organic carbon in top-soil
+```
+
 Convert to tidyverse
 
 ```{r}
@@ -83,7 +99,7 @@ ggplot(gather(soil_tibble), aes(value)) +
 
 # Your goal is to use Clay and OC to predict CEC. Get a first impression on the predictive capabilities of your data by plotting all the Clay and OC variables against all CEC variables. Discuss your plots.
 
-Plot every Clay and OC against every CEC (18 different combinations)
+Plot every Clay and OC against every CEC (18 different combinations). This could have be done in two loops, but we didn't found out how...
 
 ```{r}
 plots <- list()
@@ -424,11 +440,12 @@ CEC5 = 4.12 + 0.10 * Clay1 + 0.20 * CEC1 - 0.89 * OC1
 
 # Do a residual plot for this predictor and interpret it.
 
-Save predicted and residual values
+We use model 13 (CEC5 ~ Clay1) for this exercise
+Save predicted and residual values for model 13
 ```{r}
 residuals <- list(
-  predict(simple_linear_models$lm20),
-  residuals(simple_linear_models$lm20)
+  predict(simple_linear_models$lm13),
+  residuals(simple_linear_models$lm13)
 )
 ```
 
@@ -442,18 +459,18 @@ names(residuals_tibble)[2] <- 'residuals'
 
 Create residuals vs. fitted plot
 ```{r}
-plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_tibble$CEC5)) +
+plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC5)) +
   geom_point() +
-  geom_point(data=residuals_tibble, aes(y = residuals_tibble$predicted), shape = 1) +
-  geom_segment(aes(xend = soil_tibble$CEC1, yend = residuals_tibble$predicted), alpha = .1) +
-  xlab('Clay1 + OC1 + CEC1') + ylab('CEC5') +
+  geom_point(data=residuals_tibble, aes(y = predicted), shape = 1) +
+  geom_segment(aes(xend = soil_tibble$Clay1, yend = residuals_tibble$predicted), alpha = .1) +
+  xlab('Clay1') + ylab('CEC5') +
   theme_bw()
 plots$residual_plot
 ```
 
 ## Remarks
 * There is a slightly non-linear relationship between the residuals and the fitted values
-* Maybe it would be better to create a model which uses quadratic predictors too
+* It may be better to create a model which includes quadratic predictors too
 
 # Using the above predictor, what is the sub-soil CEC value predicted for a soil with no topsoil clay? What is the sub-soil CEC value predicted for soil with 70 weight-% of topsoil clay? Plot and interpret your result.
 
@@ -492,12 +509,12 @@ plots$prediction + geom_line(aes(y = lwr), color = "red", linetype = "dashed") +
 ```
 
 ## Remarks
-* So we can see by our eyes that for a Clay1 value of 0 there is about 5 of CEC5
-* And for an input value of 70 of Clay1 there is about 10 of CEC5
+* So we can see by our eyes that for a Clay1 value of 0 there is about 5 $c * mol _c / kg$ of CEC5
+* And for an input value of 70 of Clay1 there is about 10 $c * mol _c / kg$ of CEC5
 
 # What other business-relevant insight could you possibly get from that data set? Try out something, and interpret the results (even if it does not work out!)
 
-One question to answer is if organic carbon is rather moving upward or rather moving downward? to prove this question we create two different models:
+Another question to answer: Is organic carbon rather moving upwards or rather moving downwards? to elaborate on this we create two different models:
 
 Model21: OC5 ~ OC1 + OC2
 ```{r}
@@ -519,14 +536,17 @@ simple_linear_models$sum22
 
 ## Remarks
 * We can see that model 21 has a much higher R^2 value (and also a slightly lower p-value)
-* We would argue that organic carbon is rather moving downward than upward
-* As a business-relevant insight we would argue that keeping OC1 level high not only leads to high levels of CEC1 but ultimately also to higher levels of OC2 and OC5 (and higher levels of CEC2 and CEC5 thereof)
+* We would argue that organic carbon is rather moving downwards than upwards
+* We would thus recommend to keep OC1 levels high
+* This is relevant to businesses, as this has a direct impact on fertility
+* Not only does this lead to consistently high levels of CEC1
+* But ultimately also to higher levels of OC2 and OC5 (and therefor also higher levels of CEC2 and CEC5)
 
 ```{r}
 library("scatterplot3d")
 scatterplot3d(soil_tibble$OC1, soil_tibble$OC2, soil_tibble$OC5, highlight.3d=TRUE, col.axis="blue",
               col.grid="lightblue", main='3D Scatterplot', pch=1, angle = 30,
-              xlab = 'OC1',
-              ylab = 'OC2',
-              zlab = 'OC5')
+              xlab = 'OC (0-10cm)',
+              ylab = 'OC (10-20cm)',
+              zlab = 'OC (30-50cm)')
 ```

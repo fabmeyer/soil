@@ -337,10 +337,10 @@ simple_linear_models$sum20$r.squared
 simple_linear_models$sum20
 # CEC5 = 4.12 + 0.10 * Clay1 + 0.20 * CEC1 - 0.89 * OC1
 
-#### 10. residual plot for Model 20 ####
+#### 10. residual plot for Model 13 ####
 residuals <- list(
-  predict(simple_linear_models$lm20), # Save the predicted values
-  residuals(simple_linear_models$lm20) # Save the residual values
+  predict(simple_linear_models$lm13), # Save the predicted values
+  residuals(simple_linear_models$lm13) # Save the residual values
 )
 
 residuals <- as.data.frame(residuals)
@@ -348,11 +348,11 @@ residuals_tibble <- as_tibble(residuals)
 names(residuals_tibble)[1] <- 'predicted'
 names(residuals_tibble)[2] <- 'residuals'
 
-plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_tibble$CEC5)) +
+plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC5)) +
   geom_point() +
-  geom_point(data=residuals_tibble, aes(y = residuals_tibble$predicted), shape = 1) +
-  geom_segment(aes(xend = soil_tibble$CEC1, yend = residuals_tibble$predicted), alpha = .1) +
-  xlab('Clay1 + OC1 + CEC1') + ylab('CEC5') +
+  geom_point(data=residuals_tibble, aes(y = predicted), shape = 1) +
+  geom_segment(aes(xend = soil_tibble$Clay1, yend = residuals_tibble$predicted), alpha = .1) +
+  xlab('Clay1') + ylab('CEC5') +
   theme_bw()
 plots$residual_plot
 
