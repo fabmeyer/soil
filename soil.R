@@ -45,9 +45,6 @@ filter(Clay_topsoil, Clay_topsoil$Clay1 > 60.0) # highest measured clay in top-s
 OC_tosoil <- arrange(soil, desc(soil$OC1))
 filter(OC_tosoil, OC_tosoil$OC1 > 6.0) # highest measured organic carbon in top-soil
 
-state_crime %>% group_by(state_crime$State) %>% summarise_at( c("Population", "Robbery"), sum, na.rm = TRUE)
-
-
 #### 3. convert to tidyverse ####
 soil_tibble <- as_tibble(soil)
 View(soil_tibble) # identical
