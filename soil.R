@@ -32,6 +32,22 @@ tail(soil, n = 10)
 ### While the first 6 functions are printed to the console, the View() function opens a table in another window
 View(soil)
 
+### We can arrange the data to order it look for specific values
+arrange(soil, desc(soil$CEC1)) # most fertile to least fertile top-soil
+select(soil, c(1,4,7)) # top-soil samples
+select(soil, c(2,5,8)) # deeper soil samples
+select(soil, c(3,6,9)) # deepest sub-soil samples
+filter(soil, soil$CEC1 > 25.0)
+
+CEC_topsoil <- arrange(soil, desc(soil$CEC1))
+filter(CEC_topsoil, CEC_topsoil$CEC1 > 25.0) # most fertile top-soil
+
+Clay_topsoil <- arrange(soil, desc(soil$Clay1))
+filter(Clay_topsoil, Clay_topsoil$Clay1 > 60.0) # highest measured clay in top-soil
+
+OC_tosoil <- arrange(soil, desc(soil$OC1))
+filter(OC_tosoil, OC_tosoil$OC1 > 6.0) # highest measured organic carbon in top-soil
+
 #### 3. convert to tidyverse ####
 soil_tibble <- as_tibble(soil)
 View(soil_tibble) # identical
@@ -46,16 +62,16 @@ ggplot(gather(soil_tibble), aes(value)) +
 # mostly in the first layer (1)
 
 #### 5. plot every clay and oc against every cec (18 different combinations) ####
-# This could be done in two loops I think, but didn't found out how
+# This could be done in two loops, but we didn't found out how
 plots <- list()
 plots$plot1 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC1)) +
-    geom_point() + geom_smooth(method = 'lm') + xlab('Clay1') + ylab('CEC1')
+  geom_point() + geom_smooth(method = 'lm') + xlab('Clay1') + ylab('CEC1')
 plots$plot2 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay2, y=soil_tibble$CEC1)) +
-    geom_point() + geom_smooth(method = 'lm') + xlab('Clay2') + ylab('CEC1')
+  geom_point() + geom_smooth(method = 'lm') + xlab('Clay2') + ylab('CEC1')
 plots$plot3 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay5, y=soil_tibble$CEC1)) +
-    geom_point() + geom_smooth(method = 'lm') + xlab('Clay5') + ylab('CEC1')
+  geom_point() + geom_smooth(method = 'lm') + xlab('Clay5') + ylab('CEC1')
 plots$plot4 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC1, y=soil_tibble$CEC1)) +
-    geom_point() + geom_smooth(method = 'lm') + xlab('OC1') + ylab('CEC1')
+  geom_point() + geom_smooth(method = 'lm') + xlab('OC1') + ylab('CEC1')
 plots$plot5 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC1, y=soil_tibble$CEC1)) +
   geom_point() + geom_smooth(method = 'lm') + xlab('OC2') + ylab('CEC1')
 plots$plot6 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CEC1)) +
@@ -89,20 +105,20 @@ plots$plot18 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CE
 figures <- list()
 
 figures$figure1 <- ggarrange(plots$plot1, plots$plot2, plots$plot3, plots$plot4, plots$plot5, plots$plot6,
-                     ncol = 2, nrow = 3)
+                             ncol = 2, nrow = 3)
 figures$figure1
 # OC1 and OC2 are best for CEC1. Clay5 and OC5 have the mildest curves. OC1 is very left-skewed data.
 
 figures$figure2 <- ggarrange(plots$plot7, plots$plot8, plots$plot9, plots$plot10, plots$plot11, plots$plot12,
-                     ncol = 2, nrow = 3)
+                             ncol = 2, nrow = 3)
 figures$figure2
 # OC2 is best for CEC2. OC1's data on CEC2 is left-skewed.
 
 figures$figure3 <- ggarrange(plots$plot13, plots$plot14, plots$plot15, plots$plot16, plots$plot18, plots$plot18,
-                     ncol = 2, nrow = 3)
+                             ncol = 2, nrow = 3)
 figures$figure3
-# a middle dose of oc5 (between 1.0 and 1.5) is best for cec5. it has the steepest curve.
-# Clay1, Clay2 and Clay3 look good too. OC1 is very left-skewed data and looks it doesn't have a big effect.
+# a middle dose of oc5 (between 1.0 and 1.5) is best for cec5. It has the steepest curve.
+# Clay1, Clay2 and Clay3 look good too. OC1 is very left-skewed data and doesn't seem to have a big effect.
 
 #### 6. train a linear model for every combination from 5. (18 models) ####
 simple_linear_models <- list()
@@ -287,7 +303,7 @@ figures$figure4 <- ggarrange(plots$plot4, plots$plot11, plots$plot18,
                              ncol = 1, nrow = 3)
 figures$figure4
 
-# by looking at the plots we can see, that there is a small confidence interval
+# by looking at the plots, we can see that there is a small confidence interval
 
 #### 9. best predictor for sub-soil CEC value, given top-soil samples of Clay, OC and CEC ####
 # CEC5 ~ Clay1: Model 13
@@ -341,7 +357,7 @@ plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_t
 plots$residual_plot
 
 # There is a slightly non-linear relationship between the residuals and the fitted values
-# Maybe it would be better to create a model which uses quadratic predictors too
+# It may be better to create a model which uses quadratic predictors too
 
 #### 11. predicting with top soil clay (model13) ####
 
@@ -376,8 +392,8 @@ plots$prediction + geom_line(aes(y = lwr), color = "red", linetype = "dashed") +
 
 #### 12. try out something ####
 
-# one question to answer is if organic carbon is rather moving upward or rather moving downward
-# to prove this question we create two different models:
+# another question to answer: Is organic carbon is rather moving upwards or downwards ?
+# to elaborate on this we create two different models:
 
 # model21: OC5 ~ OC1 + OC2
 simple_linear_models$lm21 <- lm(OC5 ~ OC1 + OC2, data = soil_tibble)
@@ -392,14 +408,14 @@ simple_linear_models$sum21
 simple_linear_models$sum22
 
 # we can see that model 21 has a much higher R^2 value (and also a slightly lower p-value)
-# we would argue that organic carbon is rather moving downward than upward.
-# as a business-relevant insight we would argue that keeping OC1 level high
-# not only leads to high levels of CEC1 but ultimately also to higher levels of
-# OC2 and OC5 (and higher levels of CEC2 and CEC5 thereof).
+# we would argue that organic carbon is rather moving downwards than upwards.
+# we would thus recommend to keep OC1 levels high. This is relevant to businesses, as this has a direct impact on fertility
+# not only does this lead to consistently high levels of CEC1
+# but ultimately also to higher levels of OC2 and OC5 (and therefor also higher levels of CEC2 and CEC5).
 
 library("scatterplot3d")
 scatterplot3d(soil_tibble$OC1, soil_tibble$OC2, soil_tibble$OC5, highlight.3d=TRUE, col.axis="blue",
               col.grid="lightblue", main='3D Scatterplot', pch=1, angle = 30,
-              xlab = 'OC1',
-              ylab = 'OC2',
-              zlab = 'OC5')
+              xlab = 'OC (0-10cm)',
+              ylab = 'OC (10-20cm)',
+              zlab = 'OC (30-50cm)')
