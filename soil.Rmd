@@ -1,3 +1,17 @@
+---
+  title: "BIDS project: Soil"
+  author: Samuel Froehlich, Heiko Holziger, Fabian Meyer, Michael Zimmermann
+  date: May 27, 2020
+  output:
+    pdf_document: 
+      fig_caption: yes
+      number_sections: yes
+      toc: yes
+      highlight: tango
+    html_document: default
+---
+
+```{r}
 library('tidyverse')
 library('cluster')
 library('factoextra')
@@ -12,41 +26,66 @@ library('knitr')
 library("rmarkdown")
 library('readxl')
 theme_set(theme_pubr())
+```
 
-#### 1. import data ####
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-soil <- read.csv('soil.csv')
+# Load the data set soil.csv and view it.
 
-#### 2. inspect data ####
-### Call the functions on soil to examine the data frame
-dim(soil) # 147 rows with 9 features
-str(soil) # 147 obs. of  9 variables
+```{r}
+soil <- read_csv('soil.csv')
+```
+
+# Discuss the dataset based on str() and summary().
+
+```{r}
+dim(soil)
+str(soil)
 summary(soil)
 colnames(soil)
-typeof(soil) # data.frame
+typeof(soil)
+```
 
-### The head() and tail() functions default to 6 rows, but we can adjust the number of rows using the "n = " argument
+The head() and tail() functions default to 6 rows, but we can adjust the number of rows using the "n = " argument
+
+```{r}
 head(soil, n = 10)
 tail(soil, n = 10)
+```
 
-### While the first 6 functions are printed to the console, the View() function opens a table in another window
+While the first 6 functions are printed to the console, the View() function opens a table in another window
+
+```{r}
 View(soil)
+```
 
-#### 3. convert to tidyverse ####
+Convert to tidyverse
+
+```{r}
 soil_tibble <- as_tibble(soil)
-View(soil_tibble) # identical
-typeof(soil_tibble) # list, same as soil
-is_tibble(soil_tibble) # TRUE
+View(soil_tibble)
+typeof(soil_tibble)
+is_tibble(soil_tibble)
+```
 
-#### 4. make plots for each row to get an overview ####
+Make plots for each row to get an overview
+
+```{r}
 ggplot(gather(soil_tibble), aes(value)) + 
   geom_histogram(bins = 30) + 
   facet_wrap(~key, scales = 'free_x')
-# some of the data (CEC1, CEC2, Clay1, OC1, OC2) is left-skewed
-# mostly in the first layer (1)
+```
 
-#### 5. plot every clay and oc against every cec (18 different combinations) ####
-# This could be done in two loops I think, but didn't found out how
+## Remarks
+* Some of the data (CEC1, CEC2, Clay1, OC1, OC2) is left-skewed.
+* Mostly in the first layer (1).
+* The range of Clay on all three levels is between 8.0 and 80. The lower you dig the higher the clay percentage is.
+* OC: The Range is between 1.6 and 29.0. The Soil in the first 10 cm is the most potent. The lower you dig the worsen the soil gets.
+* CEC: The Range is between 0.2 and 10.9. The top-level soil has a higher mean than lower level.
+
+# Your goal is to use Clay and OC to predict CEC. Get a first impression on the predictive capabilities of your data by plotting all the Clay and OC variables against all CEC variables. Discuss your plots.
+
+Plot every Clay and OC against every CEC (18 different combinations)
+
+```{r}
 plots <- list()
 plots$plot1 <- ggplot(data=soil_tibble, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC1)) +
     geom_point() + geom_smooth(method = 'lm') + xlab('Clay1') + ylab('CEC1')
@@ -84,27 +123,37 @@ plots$plot17 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC2, y=soil_tibble$CE
   geom_point() + geom_smooth(method = 'lm') + xlab('OC2') + ylab('CEC5')
 plots$plot18 <- ggplot(data=soil_tibble, aes(x=soil_tibble$OC5, y=soil_tibble$CEC5)) +
   geom_point() + geom_smooth(method = 'lm') + xlab('OC5') + ylab('CEC5')
+```
 
-# Put dependent variable on one single plot:
+Put dependent variable on one single plot
+
+```{r}
 figures <- list()
-
 figures$figure1 <- ggarrange(plots$plot1, plots$plot2, plots$plot3, plots$plot4, plots$plot5, plots$plot6,
                      ncol = 2, nrow = 3)
 figures$figure1
-# OC1 and OC2 are best for CEC1. Clay5 and OC5 have the mildest curves. OC1 is very left-skewed data.
-
 figures$figure2 <- ggarrange(plots$plot7, plots$plot8, plots$plot9, plots$plot10, plots$plot11, plots$plot12,
                      ncol = 2, nrow = 3)
 figures$figure2
-# OC2 is best for CEC2. OC1's data on CEC2 is left-skewed.
-
 figures$figure3 <- ggarrange(plots$plot13, plots$plot14, plots$plot15, plots$plot16, plots$plot18, plots$plot18,
                      ncol = 2, nrow = 3)
 figures$figure3
-# a middle dose of oc5 (between 1.0 and 1.5) is best for cec5. it has the steepest curve.
-# Clay1, Clay2 and Clay3 look good too. OC1 is very left-skewed data and looks it doesn't have a big effect.
+```
 
-#### 6. train a linear model for every combination from 5. (18 models) ####
+## Remarks
+* CEC1: We clearly can see that OC1 and OC2 have the biggest influence on CEC1.
+* CEC1: Clay5 and OC5 have the mildest curve.
+* CEC1: OC1 on CEC1 is very left-skewed.
+* CEC2: OC2 is best for CEC2.
+* CEC2: OC1 on CEC2 is left-skewed.
+* CEC5: A middle dose of OC5 (between 1.0 and 1.5) is best for cec5. it has the steepest curve.
+* CEC5: Clay1, Clay2 and Clay3 look good too
+* CEC5: OC1 is very left-skewed data and looks it doesn't have a big effect.
+* All in all it can be said that predictors from within the same layer have the biggest influence on CEC values.
+
+# Build simple linear regression models for all of the above variable pairs. Plot your results.
+
+```{r}
 simple_linear_models <- list()
 
 simple_linear_models$lm1 <- lm(CEC1 ~ Clay1, data = soil_tibble)
@@ -178,8 +227,11 @@ simple_linear_models$sum17
 simple_linear_models$lm18 <- lm(CEC5 ~ OC5, data = soil_tibble)
 simple_linear_models$sum18 <- summary(simple_linear_models$lm18);
 simple_linear_models$sum18
+```
 
-#### 7. put all 18 adjusted R^2 values into a list and compare them ####
+# Based on the R-squared value, what is the best predictor for top-soil CEC (CEC1), mid-soil CEC (CEC2) and sub-soil CEC (CEC5), respectively?
+
+```{r}
 rsq_values <- list(
   simple_linear_models$sum1$r.squared,
   simple_linear_models$sum2$r.squared,
@@ -200,39 +252,52 @@ rsq_values <- list(
   simple_linear_models$sum17$r.squared,
   simple_linear_models$sum18$r.squared
 )
+```
 
-# take rsq_values list and convert to tibble
+Take rsq_values list and convert to tibble
+```{r}
 rsq_values <- as.data.frame(rsq_values)
 rsq_values <- t(rsq_values)
 rsq_values <- as.data.frame(rsq_values)
 rsq_values_tibble <- as_tibble(rsq_values)
+```
 
-# rename column
+Rename column
+```{r}
 rsq_values_tibble <- rsq_values_tibble %>% rename(r_squared = V1)
+```
 
-# add name column
+Add name column
+```{r}
 rsq_values_tibble <- rsq_values_tibble %>% add_column(name = 1:18)
+```
 
-# reorder data.frame / tibble
+Reorder data.frame / tibble
+```{r}
 rsq_values_tibble <- rsq_values_tibble[c('name', 'r_squared')]
+```
 
-# order tibble by descending R^2 value
+Order tibble by descending R^2 value
+```{r}
 rsq_values_tibble %>% arrange(desc(r_squared))
+```
 
-# best: model 4 (CEC1 ~ OC1), second: model 11 (CEC2 ~ OC2)
-# third: model 12 (CEC2 ~ OC5), fourth: model 5 (CEC1 ~ OC2)
-# best for CEC5 on rank 9: model 18 (CEC5 ~ OC5)
+## Remarks
+* Best: Model 4 (CEC1 ~ OC1)
+* Second: model 11 (CEC2 ~ OC2)
+* Third: model 12 (CEC2 ~ OC5)
+* Fourth: model 5 (CEC1 ~ OC2)
+* Best for CEC5 is on rank 9: model 18 (CEC5 ~ OC5)
+* Interpretation: In general OC levels are much more important than clay levels
+* This means there is a stronger positive correlation between CEC and OC levels than between CEC and Clay levels
+* The most important OC level is the one from the same depth of the CEC / soil itself
+* The second most important is the one that is beneath
+* This suggests that organic carbon is able to move upwards in soil
 
-# interpretation: OC levels are much more important than clay levels in general
-# the most important OC level is the one from the same depth of the soil
-# the second most important is the one that is beneath
-# this suggests that organic carbon is able to move upwards in soil
+Question: If we compare p-values, do these values correspond to the R^2-values?
 
-#### 8. put all 18 p-values into a list and comprare them against R^2 values ####
-
-# Question: if we compare p-values, do these values correspond to the R^2-values?
-
-# Function to extract the overall ANOVA p-value out of a linear model object summary
+Function to extract the overall ANOVA p-value out of a linear model object summary
+```{r}
 lmp <- function(model_summary) {
   if (class(model_summary) != "summary.lm") stop("Not an object of class 'lm' ")
   f <- model_summary$fstatistic
@@ -240,7 +305,9 @@ lmp <- function(model_summary) {
   attributes(p) <- NULL
   return(p)
 }
+```
 
+```{r}
 p_values <- list(
   lmp(simple_linear_models$sum1),
   lmp(simple_linear_models$sum2),
@@ -261,77 +328,120 @@ p_values <- list(
   lmp(simple_linear_models$sum17),
   lmp(simple_linear_models$sum18)
 )
+```
 
-# take p_values list and convert to tibble
+Take p_values list and convert to tibble
+```{r}
 p_values <- as.data.frame(p_values)
 p_values <- t(p_values)
 p_values <- as.data.frame(p_values)
 p_values_tibble <- as_tibble(p_values)
+```
 
-# rename column
+Rename column
+```{r}
 names(p_values_tibble)[1] <- 'p_value'
+```
 
-# add name column
+Add name column
+```{r}
 p_values_tibble <- p_values_tibble %>% add_column(name = 1:18)
+```
 
-# reorder data.frame / tibble
+Reorder data.frame / tibble
+```{r}
 p_values_tibble <- p_values_tibble[c('name', 'p_value')]
+```
 
-# order tibble by ascending p-value
+Order tibble by ascending p-value
+```{r}
 p_values_tibble %>% arrange(p_value)
+```
 
-# We get the exact same sequence of models like when we order the models by descending R^2-value
-# Why? Specifically for a single explanatory variable (Y = a + bX + e),
-# there is a mathematical relationship between these two values.
+## Remarks
+* We get the exact same sequence of models like when we order the models by descending R^2-value
+* Why? Specifically for a single explanatory variable (Y = a + bX + e), there is a mathematical relationship between these two values
+```{r}
 figures$figure4 <- ggarrange(plots$plot4, plots$plot11, plots$plot18,
                              ncol = 1, nrow = 3)
 figures$figure4
+```
 
-# by looking at the plots we can see, that there is a small confidence interval
+## Remarks
+* By looking at the best three plots we can see, that there is a small confidence interval
 
-#### 9. best predictor for sub-soil CEC value, given top-soil samples of Clay, OC and CEC ####
-# CEC5 ~ Clay1: Model 13
+# Based on the R-squared value, what is the best predictor for the sub-soil CEC value, given top-soil samples of Clay, OC and CEC? Did you expect this outcome? What is the straight-line equation of this predictor?
+
+CEC5 ~ Clay1: Model 13
+```{r}
 simple_linear_models$sum13$r.squared
-# CEC5 ~ OC1: Model 16
+```
+
+CEC5 ~ OC1: Model 16
+```{r}
 simple_linear_models$sum16$r.squared
-# CEC5 ~ CEC1: New Model (model 19)
+```
+
+CEC5 ~ CEC1: New Model (model 19)
+```{r}
 simple_linear_models$lm19 <- lm(CEC5 ~ CEC1, data = soil_tibble)
 simple_linear_models$sum19 <- summary(simple_linear_models$lm19);
 simple_linear_models$sum19$r.squared
-# When we compare these three R^2 values, we can observe that Clay1 has the biggest effect on CEC5 levels
-# OC1 has the lowest effect on CEC5 levels. This could suggest that organic carbon particles rather
-# move upwards than downwards or clay rather moves downwards than organic carbon
+```
 
-# Plot model 19
+## Remarks
+* When we compare these three R^2 values, we can observe that Clay1 has the biggest effect on CEC5 levels
+* OC1 has the lowest effect on CEC5 levels
+* This could suggest that organic carbon particles rather move upwards than downward
+* Or clay rather moves downward compared to organic carbon
+
+Plot model 19
+```{r}
 plots$plot19 <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_tibble$CEC5)) +
   geom_point() + geom_smooth(method = 'lm') + xlab('CEC1') + ylab('CEC5')
 plots$plot19
+```
 
-# Put Clay1, OC1 and CEC1 together in one model to predict CEC5 (model20)
+Put Clay1, OC1 and CEC1 together in one model to predict CEC5 (model20)
+```{r}
 simple_linear_models$lm20 <- lm(CEC5 ~ Clay1 + CEC1 + OC1, data = soil_tibble)
 simple_linear_models$sum20 <- summary(simple_linear_models$lm20);
 simple_linear_models$sum20$r.squared
+```
 
-# Model 20 (CEC5 ~ Clay1, CEC1, OC1) has an R^2 value of 0.309
-# Why? Because if the top layers in a soil contain a high amount of positive ions, usually lower layers contain high amounts too.
-# Additionally in soils ions can move downward ("washed out"). But they can also move toward lower levels. Or even upward.
+## Remarks
+* Model 20 (CEC5 ~ Clay1, CEC1, OC1) has an R^2 value of 0.309
+* Why? Because if the top layers in a soil contain a high amount of positive ions, usually lower layers contain high amounts too
+* Additionally in soils ions can move downward ("washed out"). But they can also move toward lower levels. Or even upward
 
-# Straight-line equation for predictor
-# CEC5 = a + b * Clay1 + c * CEC1 + d * OC1
+Straight-line equation for predictor
+CEC5 = a + b * Clay1 + c * CEC1 + d * OC1
+```{r}
 simple_linear_models$sum20
-# CEC5 = 4.12 + 0.10 * Clay1 + 0.20 * CEC1 - 0.89 * OC1
+```
 
-#### 10. residual plot for Model 20 ####
+CEC5 = 4.12 + 0.10 * Clay1 + 0.20 * CEC1 - 0.89 * OC1
+
+# Do a residual plot for this predictor and interpret it.
+
+Save predicted and residual values
+```{r}
 residuals <- list(
-  predict(simple_linear_models$lm20), # Save the predicted values
-  residuals(simple_linear_models$lm20) # Save the residual values
+  predict(simple_linear_models$lm20),
+  residuals(simple_linear_models$lm20)
 )
+```
 
+Convert to tibble and rename
+```{r}
 residuals <- as.data.frame(residuals)
 residuals_tibble <- as_tibble(residuals)
 names(residuals_tibble)[1] <- 'predicted'
 names(residuals_tibble)[2] <- 'residuals'
+```
 
+Create residuals vs. fitted plot
+```{r}
 plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_tibble$CEC5)) +
   geom_point() +
   geom_point(data=residuals_tibble, aes(y = residuals_tibble$predicted), shape = 1) +
@@ -339,67 +449,84 @@ plots$residual_plot <- ggplot(data=soil_tibble, aes(x=soil_tibble$CEC1, y=soil_t
   xlab('Clay1 + OC1 + CEC1') + ylab('CEC5') +
   theme_bw()
 plots$residual_plot
+```
 
-# There is a slightly non-linear relationship between the residuals and the fitted values
-# Maybe it would be better to create a model which uses quadratic predictors too
+## Remarks
+* There is a slightly non-linear relationship between the residuals and the fitted values
+* Maybe it would be better to create a model which uses quadratic predictors too
 
-#### 11. predicting with top soil clay (model13) ####
+# Using the above predictor, what is the sub-soil CEC value predicted for a soil with no topsoil clay? What is the sub-soil CEC value predicted for soil with 70 weight-% of topsoil clay? Plot and interpret your result.
 
-# create list with values
+Create list with coefficient values
+```{r}
 predict <- list(Intercept = simple_linear_models$sum13$coefficients[1],
                 Clay1 = simple_linear_models$sum13$coefficients[2])
+```
 
-# predict CEC5 with model 13 when there is no top soil clay (Clay1 = 0)
+Predict CEC5 with model 13 when there is no top soil clay (Clay1 = 0)
+```{r}
 predict$Intercept + 0 * predict$Clay1
-# result: 4.23
+```
 
-# predict CEC5 with model 13 when there is 70% top soil clay (Clay1 = 70.0)
+Predict CEC5 with model 13 when there is 70% top soil clay (Clay1 = 70.0)
+```{r}
 predict$Intercept + 70.0 * predict$Clay1
-# result: 10.10
+```
 
-# make a plot to visualize predictions with confidence interval
-
-# add prediction
+Make a plot to visualize predictions with confidence interval
+```{r}
 predict$predict <- predict(simple_linear_models$lm13, soil_tibble, interval = 'confidence')
 predict$data <- cbind(soil_tibble, predict$predict)
+```
 
-# regression line + confidence intervals
+Regression line + confidence intervals
+```{r}
 plots$prediction <- ggplot(data=predict$data, aes(x=soil_tibble$Clay1, y=soil_tibble$CEC5)) +
   geom_point() + geom_smooth(method = 'lm') + xlab('Clay1') + ylab('CEC5')
+```
 
-# add prediction intervals
+Add prediction intervals
+```{r}
 plots$prediction + geom_line(aes(y = lwr), color = "red", linetype = "dashed") +
   geom_line(aes(y = upr), color = "red", linetype = "dashed")
+```
 
-# So we can see by our eyes that for a Clay1 value of 0 there is about 5 of CEC5
-# And for an input value of 70 of Clay1 there is about 10 of CEC5.
+## Remarks
+* So we can see by our eyes that for a Clay1 value of 0 there is about 5 of CEC5
+* And for an input value of 70 of Clay1 there is about 10 of CEC5
 
-#### 12. try out something ####
+# What other business-relevant insight could you possibly get from that data set? Try out something, and interpret the results (even if it does not work out!)
 
-# one question to answer is if organic carbon is rather moving upward or rather moving downward
-# to prove this question we create two different models:
+One question to answer is if organic carbon is rather moving upward or rather moving downward? to prove this question we create two different models:
 
-# model21: OC5 ~ OC1 + OC2
+Model21: OC5 ~ OC1 + OC2
+```{r}
 simple_linear_models$lm21 <- lm(OC5 ~ OC1 + OC2, data = soil_tibble)
 simple_linear_models$sum21 <- summary(simple_linear_models$lm21)
+```
 
-# model22: OC1 ~ OC2 + OC5
+Model22: OC1 ~ OC2 + OC5
+```{r}
 simple_linear_models$lm22 <- lm(OC1 ~ OC2 + OC5, data = soil_tibble)
 simple_linear_models$sum22 <- summary(simple_linear_models$lm22)
+```
 
-# examine models 21 and 22
+Examine models 21 and 22
+```{r}
 simple_linear_models$sum21
 simple_linear_models$sum22
+```
 
-# we can see that model 21 has a much higher R^2 value (and also a slightly lower p-value)
-# we would argue that organic carbon is rather moving downward than upward.
-# as a business-relevant insight we would argue that keeping OC1 level high
-# not only leads to high levels of CEC1 but ultimately also to higher levels of
-# OC2 and OC5 (and higher levels of CEC2 and CEC5 thereof).
+## Remarks
+* We can see that model 21 has a much higher R^2 value (and also a slightly lower p-value)
+* We would argue that organic carbon is rather moving downward than upward
+* As a business-relevant insight we would argue that keeping OC1 level high not only leads to high levels of CEC1 but ultimately also to higher levels of OC2 and OC5 (and higher levels of CEC2 and CEC5 thereof)
 
+```{r}
 library("scatterplot3d")
 scatterplot3d(soil_tibble$OC1, soil_tibble$OC2, soil_tibble$OC5, highlight.3d=TRUE, col.axis="blue",
               col.grid="lightblue", main='3D Scatterplot', pch=1, angle = 30,
               xlab = 'OC1',
               ylab = 'OC2',
               zlab = 'OC5')
+```
