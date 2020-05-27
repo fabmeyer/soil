@@ -290,7 +290,7 @@ simple_linear_models$sum20$r.squared
 simple_linear_models$sum20
 # CEC5 = 4.12 + 0.10 * Clay1 + 0.20 * CEC1 - 0.89 * OC1
 
-#### 10. residual plot for Model 19 ####
+#### 10. residual plot for Model 20 ####
 residuals <- list(
   predict(simple_linear_models$lm20), # Save the predicted values
   residuals(simple_linear_models$lm20) # Save the residual values
